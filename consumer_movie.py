@@ -41,7 +41,7 @@ schema =StructType([
 
 
 selected_df = value_df.withColumn("values", F.from_json(value_df["value"], schema)).selectExpr("values")
-selected_df.printSchema()
+# selected_df.printSchema()
 
 result_df = selected_df.select(
     F.col("values.id").alias("id"),
@@ -49,6 +49,7 @@ result_df = selected_df.select(
     F.col("values.original_language").alias("original_language"),
     F.col("values.title").alias("title"),
     F.col("values.poster_path").alias("poster"),
+    F.col("values.genre_ids").alias("genre"),
     F.col("values.popularity").alias("popularity"),
     F.col("values.vote_average").alias("vote_average"),
     F.col("values.release_date").alias("release_date"),
@@ -56,13 +57,42 @@ result_df = selected_df.select(
 )
 
 
+
+# Mapping of genre IDs to names
+genre_mapping = {
+    28: "Action",
+    12: "Adventure",
+    16: "Animation",
+    35: "Comedy",
+    80: "Crime",
+    99: "Documentary",
+    18: "Drama",
+    10751: "Family",
+    14: "Fantasy",
+    36: "History",
+    27: "Horror",
+    10402: "Music",
+    9648: "Mystery",
+    10749: "Romance",
+    878: "Science Fiction",
+    10770: "TV Movie",
+    53: "Thriller",
+    10752: "War",
+    37: "Western"
+}
+
+# Replace genre IDs with names using genre_mapping
+for genre_id, genre_name in genre_mapping.items():
+    result_df = result_df.withColumn("genre", F.when(result_df["genre"] == genre_id, genre_name).otherwise(result_df["genre"]))
+
+
 query = result_df.writeStream \
     .format("org.elasticsearch.spark.sql") \
     .outputMode("append") \
-    .option("es.resource", "moviesdatabase") \
+    .option("es.resource", "moviesdatabase_res") \
     .option("es.nodes", "localhost") \
     .option("es.port", "9200") \
-    .option("es.nodes.wan.only", "true")\
+    .option("es.nodes.wan.only", "false")\
     .option("es.index.auto.create", "true")\
     .option("checkpointLocation", "./checkpointLocation/") \
     .start()

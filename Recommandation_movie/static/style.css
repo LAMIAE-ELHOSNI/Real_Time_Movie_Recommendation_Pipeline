@@ -44,3 +44,10 @@ body {
 .search-input {
     width: 300px;
 }
+.no-poster {
+    height: 200px; /* Set a fixed height for the no-poster div */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa; /* Light gray background */
+}
