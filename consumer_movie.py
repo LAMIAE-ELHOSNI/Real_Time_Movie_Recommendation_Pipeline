@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
 from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StructField, StringType,BooleanType, IntegerType, ArrayType
+from pyspark.sql.types import StructType, StructField, StringType,BooleanType, IntegerType, ArrayType,DateType
 
 SparkSession.builder.config(conf=SparkConf())
 
@@ -22,34 +22,34 @@ df = spark.readStream \
 
 value_df = df.selectExpr("CAST(value AS STRING)")
 
-schema = StructType([
+schema =StructType([
     StructField("adult", BooleanType(), True),
-    StructField("belongs_to_collection", StructType([
-        StructField("name", StringType(), True),
-        StructField("backdrop_path", StringType(), True)
-    ]), True),
+    StructField("backdrop_path", StringType(), True),
+    StructField("genre_ids", ArrayType(IntegerType()), True),
+    StructField("id", IntegerType(), True),
     StructField("original_language", StringType(), True),
+    StructField("original_title", StringType(), True),
     StructField("overview", StringType(), True),
     StructField("popularity", StringType(), True),
-    StructField("production_companies", ArrayType(StructType([
-        StructField("id", IntegerType(), True),
-        StructField("origin_country", StringType(), True)
-    ])), True),
-    StructField("production_countries", ArrayType(StructType([
-        StructField("name", StringType(), True)
-    ])), True),
+    StructField("poster_path", StringType(), True),
     StructField("release_date", StringType(), True),
-    StructField("vote_average", StringType(), True),
+    StructField("title", StringType(), True),
+    StructField("video", BooleanType(), True),
+    StructField("vote_average", IntegerType(), True),
     StructField("vote_count", IntegerType(), True)
 ])
 
 
 selected_df = value_df.withColumn("values", F.from_json(value_df["value"], schema)).selectExpr("values")
+selected_df.printSchema()
 
 result_df = selected_df.select(
+    F.col("values.id").alias("id"),
     F.col("values.overview").alias("overview"),
     F.col("values.original_language").alias("original_language"),
     F.col("values.title").alias("title"),
+    F.col("values.poster_path").alias("poster"),
+    F.col("values.popularity").alias("popularity"),
     F.col("values.vote_average").alias("vote_average"),
     F.col("values.release_date").alias("release_date"),
     F.col("values.vote_count").alias("vote_count"),
@@ -59,7 +59,7 @@ result_df = selected_df.select(
 query = result_df.writeStream \
     .format("org.elasticsearch.spark.sql") \
     .outputMode("append") \
-    .option("es.resource", "film") \
+    .option("es.resource", "moviesdatabase") \
     .option("es.nodes", "localhost") \
     .option("es.port", "9200") \
     .option("es.nodes.wan.only", "true")\
@@ -68,6 +68,4 @@ query = result_df.writeStream \
     .start()
 
 query = result_df.writeStream.outputMode("append").format("console").start()
-
 query.awaitTermination()
-

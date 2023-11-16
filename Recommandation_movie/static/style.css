@@ -1,0 +1,46 @@
+/* Add your custom styles here */
+body {
+    background-color: #f8f9fa; /* Light gray background */
+    padding: 20px;
+}
+
+.movie-list {
+    list-style: none;
+    padding: 0;
+}
+
+.movie-item {
+    background-color: #ffffff; /* White background for each movie item */
+    border: 1px solid #dee2e6; /* Light gray border */
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.movie-title {
+    color: #007bff; /* Blue color for movie title */
+}
+
+.navbar {
+    background-color: #343a40; /* Dark background for the navigation bar */
+}
+
+.navbar-brand {
+    color: #ffffff !important; /* White color for the brand text */
+}
+
+.navbar-brand:hover {
+    color: #ffffff !important; /* White color for the brand text on hover */
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff !important; /* White color for the nav links */
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #007bff !important; /* Blue color for the nav links on hover */
+}
+
+.search-input {
+    width: 300px;
+}
